@@ -1,0 +1,38 @@
+from sklearn.datasets import load_iris
+from sklearn.linear_model import Lasso
+from sklearn.feature_selection import SelectFromModel
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# loading the iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Initializing and training the Lasso model
+lasso = Lasso(alpha=0.01)
+lasso.fit(X_train, y_train)
+
+# Creating the feature selector
+selector = SelectFromModel(lasso)
+selector.fit(X_train, y_train)
+
+# Transforming the data
+X_train_selected = selector.transform(X_train)
+X_test_selected = selector.transform(X_test)
+
+# Training a new model with selected features
+from sklearn.linear_model import LogisticRegression
+
+clf = LogisticRegression()
+clf.fit(X_train_selected, y_train)
+y_pred = clf.predict(X_test_selected)
+
+# Checking the model's accuracy
+print("Accuracy:",accuracy_score(y_test, y_pred))
+
+# Checking the number of selected features
+print("Number of selected features:", X_train_selected.shape[1])
