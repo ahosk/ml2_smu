@@ -34,6 +34,9 @@ from sklearn.exceptions import ConvergenceWarning
 ConvergenceWarning("ignore")
 warnings.filterwarnings("error")
 
+# get directory to save results
+results_dir = os.path.join(os.path.dirname(__file__) + "/Results/")
+
 
 def run():
 
@@ -245,7 +248,10 @@ def grid_search(
                     "actual": y_test,
                 }
             ]
-        with open(os.path.join(os.getcwd(), "results.pkl"), "wb") as f:
+        with open(
+            os.path.join(results_dir, "grid_search_results.pkl"),
+            "wb",
+        ) as f:
             pkl.dump(results, f)
     return results
 
@@ -257,6 +263,7 @@ def predict_proba(self, X):
 
 def plot_data(data, prediction_type):
     today = datetime.now().date()
+
     if prediction_type == "classification":
         for model_name, model_data in data.items():
             for model_info in model_data:
@@ -285,8 +292,6 @@ def plot_data(data, prediction_type):
                     actuals = model_info["actual"]
                     score_type = model_info["score_type"]
                     resids = actuals - preds
-                    intercept = model_info["intercept_"]
-                    coef = model_info["coef_"]
                     plt.hist(
                         resids,
                         bins=20,
@@ -294,14 +299,18 @@ def plot_data(data, prediction_type):
                         label=f"{model_name.upper()} results using {score_type} for best model",
                     )
                     plt.legend()
+                    file_name_1 = f"{model_name.upper()}_hist_{today}.png"
+                    plt.savefig(os.path.join(results_dir, file_name_1))
                     plt.show()
-                    # plt.savefig(f"{model_name.upper()}_hist_{today}.png")
                     plt.scatter(
                         actuals,
                         preds,
                         color="red",
                         label=f"{model_name.upper()} results using {score_type} for best model",
                     )
+                    file_name_2 = f"{model_name.upper()}_scatter_{today}.png"
+                    plt.savefig(os.path.join(results_dir, file_name_2))
+                    plt.show()
             # plot residual histogram for non LinerRegression Models
             else:
                 for model_name, model_data in data.items():
@@ -317,8 +326,9 @@ def plot_data(data, prediction_type):
                             label=f"{model_name.upper()} results using {score_type} for best model",
                         )
                         plt.legend()
+                        file_name_3 = f"{model_name.upper()}_hist_{today}.png"
+                        plt.savefig(os.path.join(results_dir, file_name_3))
                         plt.show()
-                        # plt.savefig(f"{model_name.upper()}_hist_{today}.png")
                         plt.scatter(
                             actuals,
                             preds,
@@ -326,8 +336,9 @@ def plot_data(data, prediction_type):
                             label=f"{model_name.upper()} results using {score_type} for best model",
                         )
                         plt.legend()
+                        file_name_4 = f"{model_name.upper()}_scatter_{today}.png"
+                        plt.savefig(os.path.join(results_dir, file_name_4))
                         plt.show()
-                        # plt.savefig(f"{model_name.upper()}_scatter_{today}.png")
 
 
 def check_target(data):
