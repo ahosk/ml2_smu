@@ -10,6 +10,7 @@ from sklearn.metrics import (
     r2_score,
     explained_variance_score,
     confusion_matrix,
+    classification_report,
 )
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.ensemble import (
@@ -17,9 +18,9 @@ from sklearn.ensemble import (
     RandomForestRegressor,
     RandomForestClassifier,
 )
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import KFold
 from sklearn.datasets import load_diabetes, load_wine, load_iris
+import seaborn as sns
 import matplotlib.pyplot as plt
 import pickle as pkl
 from itertools import product
@@ -37,15 +38,18 @@ warnings.filterwarnings("error")
 # get directory to save results
 results_dir = os.path.join(os.path.dirname(__file__) + "/Results/")
 
+# get today's date for file names
+today = datetime.now().date()
+
 
 def run():
 
     models_params = {
-        "LinearRegression": {
+        "Linear_Regression": {
             "model": LinearRegression(),
             "parameters": {"fit_intercept": [True, False]},
         },
-        "RandomForestRegressor": {
+        "Random_Forest_Regressor": {
             "model": RandomForestRegressor(),
             "parameters": {
                 "criterion": [
@@ -59,7 +63,7 @@ def run():
                 "max_depth": [None, 5, 10],
             },
         },
-        "LogisticRegression": {
+        "Logistic_Regression": {
             "model": LogisticRegression(),
             "parameters": {
                 "solver": ["lbfgs", "sag", "saga"],
@@ -69,7 +73,7 @@ def run():
                 "max_iter": [50000],
             },
         },
-        "GradientBoostingRegressor": {
+        "Gradient_Boosting_Regressor": {
             "model": GradientBoostingRegressor(),
             "parameters": {
                 "loss": ["squared_error", "absolute_error", "huber", "quantile"],
@@ -79,19 +83,12 @@ def run():
                 "alpha": [1.0, 0.8, 0.6, 0.4, 0.2, 0.0],
             },
         },
-        "RandomForestClassifier": {
+        "Random_Forest_Classifier": {
             "model": RandomForestClassifier(),
             "parameters": {
                 "criterion": ["gini", "entropy", "log_loss"],
                 "n_estimators": [100, 1000, 10000],
                 "max_features": ["sqrt", "log2", None],
-            },
-            "KNN": {
-                "model": KNeighborsClassifier(),
-                "parameters": {
-                    "n_neighbors": [5, 10, 25, 50],
-                    "algorithm": ["auto", "ball_tree", "kd_tree", "brute"],
-                },
             },
         },
     }
@@ -150,11 +147,11 @@ def grid_search(
     else:
         model_type = model_type
     results = {}
-    classifier_models = ["RandomForestClassifier", "LogisticRegression", "KNN"]
+    classifier_models = ["Random_Forest_Classifier", "Logistic_Regression"]
     regression_models = [
-        "LinearRegression",
-        "RandomForestRegressor",
-        "GradientBoostingRegressor",
+        "Linear_Regression",
+        "Random_Forest_Regressor",
+        "Gradient_Boosting_Regressor",
     ]
     new_models_params = limit_models_params(
         models_params, classifier_models, regression_models, target_type=model_type
@@ -178,8 +175,8 @@ def grid_search(
                         model.fit(X_train, y_train)
                         y_pred = model.predict(X_test)
                         if model_name not in [
-                            "RandomForestRegressor",
-                            "GradientBoostingRegressor",
+                            "Random Forest Regressor",
+                            "Gradient Boosting Regressor",
                         ]:
                             coef = model.coef_
                             intercept = model.intercept_
@@ -212,14 +209,21 @@ def grid_search(
                         y_pred = model.predict(X_test)
                         score = {
                             "f1_score": f1_score(y_test, y_pred > 0.5),
-                            "log_loss": log_loss(y_test, y_pred),
+                            "log_loss": log_loss(y_test, y_pred),  # low
                             "recall": recall_score(y_test, y_pred),
                             "precision": precision_score(y_test, y_pred),
                             "roc_auc": roc_auc_score(y_test, y_pred),
                         }
                         if (
                             best_score is None
-                            or score[plot_score] > best_score[plot_score]
+                            or (
+                                plot_score == "log_loss"
+                                and score[plot_score] < best_score[plot_score]
+                            )
+                            or (
+                                plot_score != "log_loss"
+                                and score[plot_score] < best_score[plot_score]
+                            )
                         ):
                             best_score = score
                             best_param_set = param_set
@@ -246,10 +250,11 @@ def grid_search(
                     "score_type": plot_score,
                     "pred": y_pred,
                     "actual": y_test,
+                    "classes": np.unique(y_test),
                 }
             ]
         with open(
-            os.path.join(results_dir, "grid_search_results.pkl"),
+            os.path.join(results_dir, f"grid_search_results_{today}.pkl"),
             "wb",
         ) as f:
             pkl.dump(results, f)
@@ -262,14 +267,15 @@ def predict_proba(self, X):
 
 
 def plot_data(data, prediction_type):
-    today = datetime.now().date()
-
     if prediction_type == "classification":
         for model_name, model_data in data.items():
+            model_name = model_name.title()
+            title_model_name = model_name.replace("_", " ")
             for model_info in model_data:
                 preds = model_info["pred"]
                 actuals = model_info["actual"]
                 score_type = model_info["score_type"]
+                labels = model_info["classes"]
 
                 cm = confusion_matrix(actuals, preds.round(), labels=[1, 2])
 
@@ -280,13 +286,53 @@ def plot_data(data, prediction_type):
                     for j in range(cm.shape[1]):
                         ax.text(x=j, y=i, s=cm[i, j], va="center", ha="center")
 
-                plt.title(f"Confusion matrix for {model_name} using {score_type}")
+                plt.title(f"Confusion matrix for {title_model_name} using {score_type}")
                 plt.xlabel("Predicted label")
                 plt.ylabel("True label")
+                _file_name_ = f"{model_name}_CRH_{today}.png"
+                plt.savefig(os.path.join(results_dir, _file_name_))
                 plt.show()
+
+                clf_report = classification_report(
+                    actuals,
+                    preds.round(),
+                    labels=labels,
+                    output_dict=True,
+                )
+
+                metrics = ["precision", "recall", "f1-score"]
+
+                data = []
+                labels = [
+                    key
+                    for key in clf_report.keys()
+                    if key not in ["accuracy", "macro avg", "weighted avg"]
+                ]
+                for metric in metrics:
+                    values = [clf_report[key][metric] for key in labels]
+                    data.append(values)
+
+                plt.figure(figsize=(7, 5))
+                sns.heatmap(
+                    data,
+                    annot=True,
+                    cmap="Blues",
+                    xticklabels=metrics,
+                    yticklabels=labels,
+                )
+                plt.xlabel("Metrics")
+                plt.ylabel("Classes")
+                plt.title(f"Classification Report Heatmap for {title_model_name}")
+                plt.tight_layout()
+                file_name_ = f"{model_name}_CRH_{today}.png"
+                plt.savefig(os.path.join(results_dir, file_name_))
+                plt.show()
+
     elif prediction_type == "regression":
         for model_name, model_data in data.items():
-            if model_name == "LinearRegression":
+            model_name = model_name.title()
+            title_model_name = model_name.replace("_", " ")
+            if model_name == "Linear Regression":
                 for model_info in model_data:
                     preds = model_info["pred"]
                     actuals = model_info["actual"]
@@ -296,19 +342,19 @@ def plot_data(data, prediction_type):
                         resids,
                         bins=20,
                         color="blue",
-                        label=f"{model_name.upper()} results using {score_type} for best model",
+                        label=f"{title_model_name} results using {score_type} for best model",
                     )
                     plt.legend()
-                    file_name_1 = f"{model_name.upper()}_hist_{today}.png"
+                    file_name_1 = f"{model_name}_hist_{today}.png"
                     plt.savefig(os.path.join(results_dir, file_name_1))
                     plt.show()
                     plt.scatter(
                         actuals,
                         preds,
                         color="red",
-                        label=f"{model_name.upper()} results using {score_type} for best model",
+                        label=f"{title_model_name} results using {score_type} for best model",
                     )
-                    file_name_2 = f"{model_name.upper()}_scatter_{today}.png"
+                    file_name_2 = f"{model_name}_scatter_{today}.png"
                     plt.savefig(os.path.join(results_dir, file_name_2))
                     plt.show()
             # plot residual histogram for non LinerRegression Models
@@ -323,20 +369,20 @@ def plot_data(data, prediction_type):
                             resids,
                             bins=20,
                             color="blue",
-                            label=f"{model_name.upper()} results using {score_type} for best model",
+                            label=f"{title_model_name} results using {score_type} for best model",
                         )
                         plt.legend()
-                        file_name_3 = f"{model_name.upper()}_hist_{today}.png"
+                        file_name_3 = f"{model_name}_hist_{today}.png"
                         plt.savefig(os.path.join(results_dir, file_name_3))
                         plt.show()
                         plt.scatter(
                             actuals,
                             preds,
                             color="red",
-                            label=f"{model_name.upper()} results using {score_type} for best model",
+                            label=f"{title_model_name} results using {score_type} for best model",
                         )
                         plt.legend()
-                        file_name_4 = f"{model_name.upper()}_scatter_{today}.png"
+                        file_name_4 = f"{model_name}_scatter_{today}.png"
                         plt.savefig(os.path.join(results_dir, file_name_4))
                         plt.show()
 
