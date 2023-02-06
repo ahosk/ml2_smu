@@ -175,8 +175,8 @@ def grid_search(
                         model.fit(X_train, y_train)
                         y_pred = model.predict(X_test)
                         if model_name not in [
-                            "Random Forest Regressor",
-                            "Gradient Boosting Regressor",
+                            "Random_Forest_Regressor",
+                            "Gradient_Boosting_Regressor",
                         ]:
                             coef = model.coef_
                             intercept = model.intercept_
