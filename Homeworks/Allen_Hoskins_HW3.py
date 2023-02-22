@@ -1,216 +1,191 @@
 from collections import Counter
 import numpy as np
 
+people = {
+    "Jane": {
+        "willingness to travel": 5,
+        "desire for new experience": 4,
+        "cost": 3,
+        "indian food": 2,
+        "mexican food": 5,
+        "hipster points": 4,
+        "vegetarian": 3,
+    },
+    "John": {
+        "willingness to travel": 3,
+        "desire for new experience": 5,
+        "cost": 2,
+        "indian food": 5,
+        "mexican food": 4,
+        "hipster points": 3,
+        "vegetarian": 2,
+    },
+    "Bob": {
+        "willingness to travel": 4,
+        "desire for new experience": 5,
+        "cost": 3,
+        "indian food": 5,
+        "mexican food": 3,
+        "hipster points": 2,
+        "vegetarian": 4,
+    },
+    "Lisa": {
+        "willingness to travel": 5,
+        "desire for new experience": 4,
+        "cost": 2,
+        "indian food": 4,
+        "mexican food": 5,
+        "hipster points": 5,
+        "vegetarian": 6,
+    },
+    "Sarah": {
+        "willingness to travel": 4,
+        "desire for new experience": 5,
+        "cost": 3,
+        "indian food": 5,
+        "mexican food": 4,
+        "hipster points": 3,
+        "vegetarian": 7,
+    },
+    "Tom": {
+        "willingness to travel": 2,
+        "desire for new experience": 3,
+        "cost": 5,
+        "indian food": 5,
+        "mexican food": 2,
+        "hipster points": 1,
+        "vegetarian": 1,
+    },
+    "Henry": {
+        "willingness to travel": 5,
+        "desire for new experience": 5,
+        "cost": 1,
+        "indian food": 5,
+        "mexican food": 5,
+        "hipster points": 5,
+        "vegetarian": 2,
+    },
+    "David": {
+        "willingness to travel": 3,
+        "desire for new experience": 4,
+        "cost": 2,
+        "indian food": 4,
+        "mexican food": 3,
+        "hipster points": 2,
+        "vegetarian": 9,
+    },
+    "Emily": {
+        "willingness to travel": 4,
+        "desire for new experience": 5,
+        "cost": 3,
+        "indian food": 5,
+        "mexican food": 4,
+        "hipster points": 3,
+        "vegetarian": 7,
+    },
+    "Michael": {
+        "willingness to travel": 5,
+        "desire for new experience": 4,
+        "cost": 1,
+        "indian food": 5,
+        "mexican food": 5,
+        "hipster points": 4,
+        "vegetarian": 5,
+    },
+}
 
-def run(boss=resp):
-
-    people = {
-        "Jane": {
-            "willingness to travel": 5,
-            "desire for new experience": 4,
-            "cost": 3,
-            "indian food": 2,
-            "mexican food": 5,
-            "hipster points": 4,
-            "vegetarian": 3,
-        },
-        "John": {
-            "willingness to travel": 3,
-            "desire for new experience": 5,
-            "cost": 2,
-            "indian food": 5,
-            "mexican food": 4,
-            "hipster points": 3,
-            "vegetarian": 2,
-        },
-        "Bob": {
-            "willingness to travel": 4,
-            "desire for new experience": 5,
-            "cost": 3,
-            "indian food": 5,
-            "mexican food": 3,
-            "hipster points": 2,
-            "vegetarian": 4,
-        },
-        "Lisa": {
-            "willingness to travel": 5,
-            "desire for new experience": 4,
-            "cost": 2,
-            "indian food": 4,
-            "mexican food": 5,
-            "hipster points": 5,
-            "vegetarian": 6,
-        },
-        "Sarah": {
-            "willingness to travel": 4,
-            "desire for new experience": 5,
-            "cost": 3,
-            "indian food": 5,
-            "mexican food": 4,
-            "hipster points": 3,
-            "vegetarian": 7,
-        },
-        "Tom": {
-            "willingness to travel": 2,
-            "desire for new experience": 3,
-            "cost": 5,
-            "indian food": 5,
-            "mexican food": 2,
-            "hipster points": 1,
-            "vegetarian": 1,
-        },
-        "Henry": {
-            "willingness to travel": 5,
-            "desire for new experience": 5,
-            "cost": 1,
-            "indian food": 5,
-            "mexican food": 5,
-            "hipster points": 5,
-            "vegetarian": 2,
-        },
-        "David": {
-            "willingness to travel": 3,
-            "desire for new experience": 4,
-            "cost": 2,
-            "indian food": 4,
-            "mexican food": 3,
-            "hipster points": 2,
-            "vegetarian": 9,
-        },
-        "Emily": {
-            "willingness to travel": 4,
-            "desire for new experience": 5,
-            "cost": 3,
-            "indian food": 5,
-            "mexican food": 4,
-            "hipster points": 3,
-            "vegetarian": 7,
-        },
-        "Michael": {
-            "willingness to travel": 5,
-            "desire for new experience": 4,
-            "cost": 1,
-            "indian food": 5,
-            "mexican food": 5,
-            "hipster points": 4,
-            "vegetarian": 5,
-        },
-    }
-
-    restaurants = {
-        "Flacos": {
-            "distance": 2,
-            "novelty": 3,
-            "cost": 2,
-            "average rating": 4,
-            "outside seating": 1,
-            "vegetarian": 3,
-            "newness": 2,
-        },
-        "Indian Delight": {
-            "distance": 1,
-            "novelty": 2,
-            "cost": 3,
-            "average rating": 5,
-            "outside seating": 2,
-            "vegetarian": 7,
-            "newness": 1,
-        },
-        "Hipster Café": {
-            "distance": 3,
-            "novelty": 5,
-            "cost": 4,
-            "average rating": 3,
-            "outside seating": 3,
-            "vegetarian": 9,
-            "newness": 8,
-        },
-        "Sushi Palace": {
-            "distance": 4,
-            "novelty": 4,
-            "cost": 5,
-            "average rating": 5,
-            "outside seating": 4,
-            "vegetarian": 9,
-            "newness": 7,
-        },
-        "Steak House": {
-            "distance": 5,
-            "novelty": 2,
-            "cost": 5,
-            "average rating": 4,
-            "outside seating": 5,
-            "vegetarian": 1,
-            "newness": 4,
-        },
-        "Vegetarian Haven": {
-            "distance": 2,
-            "novelty": 3,
-            "cost": 2,
-            "average rating": 5,
-            "outside seating": 6,
-            "vegetarian": 10,
-            "newness": 9,
-        },
-        "Pasta Factory": {
-            "distance": 3,
-            "novelty": 4,
-            "cost": 3,
-            "average rating": 4,
-            "outside seating": 9,
-            "vegetarian": 7,
-            "newness": 6,
-        },
-        "Thai Kitchen": {
-            "distance": 1,
-            "novelty": 5,
-            "cost": 2,
-            "average rating": 5,
-            "outside seating": 7,
-            "vegetarian": 6,
-            "newness": 6,
-        },
-        "BBQ Joint": {
-            "distance": 4,
-            "novelty": 2,
-            "cost": 5,
-            "average rating": 4,
-            "outside seating": 8,
-            "vegetarian": 1,
-            "newness": 2,
-        },
-        "Mexican Taqueria": {
-            "distance": 5,
-            "novelty": 3,
-            "cost": 2,
-            "average rating": 4,
-            "outside seating": 1,
-            "vegetarian": 3,
-            "newness": 8,
-        },
-    }
-
-    if boss == "FALSE":
-        pass
-    else:
-        new_cost = int(input("New price point? (1 - 10)"))
-        people = update_cost_for_boss(people, new_cost)
-
-    people_cols, people_rows, people_matrix = create_array(people)
-    rest_cols, rest_rows, rest_matrix = create_array(restaurants)
-    people_top_rests = get_top_rest(
-        person_dictionary=people,
-        restaurant_list=rest_rows,
-        matrix_1=people_matrix,
-        matrix_2=rest_matrix,
-    )
-    jane_top_rest = get_person_top_rest("Jane", people_top_rests)
-
-    full_rest_rankings = sort_nested_dict()
-
-    optimal_rest = find_optimal_restaurant(full_rest_rankings)
-
-    return jane_top_rest, people_top_rests, full_rest_rankings, optimal_rest
+restaurants = {
+    "Flacos": {
+        "distance": 2,
+        "novelty": 3,
+        "cost": 2,
+        "average rating": 4,
+        "outside seating": 1,
+        "vegetarian": 3,
+        "newness": 2,
+    },
+    "Indian Delight": {
+        "distance": 1,
+        "novelty": 2,
+        "cost": 3,
+        "average rating": 5,
+        "outside seating": 2,
+        "vegetarian": 7,
+        "newness": 1,
+    },
+    "Hipster Café": {
+        "distance": 3,
+        "novelty": 5,
+        "cost": 4,
+        "average rating": 3,
+        "outside seating": 3,
+        "vegetarian": 9,
+        "newness": 8,
+    },
+    "Sushi Palace": {
+        "distance": 4,
+        "novelty": 4,
+        "cost": 5,
+        "average rating": 5,
+        "outside seating": 4,
+        "vegetarian": 9,
+        "newness": 7,
+    },
+    "Steak House": {
+        "distance": 5,
+        "novelty": 2,
+        "cost": 5,
+        "average rating": 4,
+        "outside seating": 5,
+        "vegetarian": 1,
+        "newness": 4,
+    },
+    "Vegetarian Haven": {
+        "distance": 2,
+        "novelty": 3,
+        "cost": 2,
+        "average rating": 5,
+        "outside seating": 6,
+        "vegetarian": 10,
+        "newness": 9,
+    },
+    "Pasta Factory": {
+        "distance": 3,
+        "novelty": 4,
+        "cost": 3,
+        "average rating": 4,
+        "outside seating": 9,
+        "vegetarian": 7,
+        "newness": 6,
+    },
+    "Thai Kitchen": {
+        "distance": 1,
+        "novelty": 5,
+        "cost": 2,
+        "average rating": 5,
+        "outside seating": 7,
+        "vegetarian": 6,
+        "newness": 6,
+    },
+    "BBQ Joint": {
+        "distance": 4,
+        "novelty": 2,
+        "cost": 5,
+        "average rating": 4,
+        "outside seating": 8,
+        "vegetarian": 1,
+        "newness": 2,
+    },
+    "Mexican Taqueria": {
+        "distance": 5,
+        "novelty": 3,
+        "cost": 2,
+        "average rating": 4,
+        "outside seating": 1,
+        "vegetarian": 3,
+        "newness": 8,
+    },
+}
 
 
 def create_array(dict):
@@ -293,7 +268,7 @@ def matrix_to_nested_dict(**kwargs):
     return nested_dict
 
 
-def sort_nested_dict():
+def sort_nested_dict(people_matrix, rest_matrix, people_rows, rest_rows):
     nested_dict = matrix_to_nested_dict(
         matrix_1=people_matrix,
         matrix_2=rest_matrix,
@@ -329,8 +304,50 @@ def update_cost_for_boss(dictionary, new_cost):
     return dictionary
 
 
+def run(boss="FALSE"):
+    global people
+    global restaurants
+    if boss == "FALSE":
+        people_cols, people_rows, people_matrix = create_array(people)
+        rest_cols, rest_rows, rest_matrix = create_array(restaurants)
+        people_top_rests = get_top_rest(
+            person_dictionary=people,
+            restaurant_list=rest_rows,
+            matrix_1=people_matrix,
+            matrix_2=rest_matrix,
+        )
+        jane_top_rest = get_person_top_rest("Jane", people_top_rests)
+
+        full_rest_rankings = sort_nested_dict(
+            people_matrix, rest_matrix, people_rows, rest_rows
+        )
+
+        optimal_rest = find_optimal_restaurant(full_rest_rankings)
+    else:
+        new_cost = int(input("New price point? (1 - 10)"))
+        people = update_cost_for_boss(people, new_cost)
+        people_cols, people_rows, people_matrix = create_array(people)
+        rest_cols, rest_rows, rest_matrix = create_array(restaurants)
+        people_top_rests = get_top_rest(
+            person_dictionary=people,
+            restaurant_list=rest_rows,
+            matrix_1=people_matrix,
+            matrix_2=rest_matrix,
+        )
+        jane_top_rest = get_person_top_rest("Jane", people_top_rests)
+
+        full_rest_rankings = sort_nested_dict(
+            people_matrix, rest_matrix, people_rows, rest_rows
+        )
+
+        optimal_rest = find_optimal_restaurant(full_rest_rankings)
+
+    return jane_top_rest, people_top_rests, full_rest_rankings, optimal_rest
+
+
 if __name__ == "__main__":
     resp = input("Is the Boss Coming? (True/False)").upper()
-    jane_top_rest, people_top_rests, full_rest_rankings, optimal_restaurant = run(
-        boss=resp
+    jane_top_rest, people_top_rests, full_rest_rankings, optimal_rest = run(boss=resp)
+    print(
+        f"{jane_top_rest}\n\nPeople Top Restaurants: \n{people_top_rests}\n\nFull Restaurant Rankings: \n{full_rest_rankings}\n\nOptimal Restaurant: \n{optimal_rest}"
     )
