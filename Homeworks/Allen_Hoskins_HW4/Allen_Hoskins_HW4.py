@@ -95,7 +95,7 @@ for l in feature_layers:
     l.trainable = False
 
 
-folder = "../letters HW4/"
+folder = "./letters HW4/"
 x = np.array([])
 y = np.array([])
 for f in os.listdir(folder):
